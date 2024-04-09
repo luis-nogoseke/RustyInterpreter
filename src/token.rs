@@ -23,6 +23,8 @@ pub const LT: &str = "<";
 pub const BANG: &str = "!";
 pub const ASTERISK: &str = "*";
 pub const SLASH: &str = "/";
+pub const EQ: &str = "==";
+pub const NOT_EQ: &str = "!=";
 
 // Delimeters
 pub const COMMA: &str = ",";
@@ -36,11 +38,20 @@ pub const RBRACE: &str = "}";
 // KEYWORDS
 pub const FUNCTION: &str = "FUNCTION";
 pub const LET: &str = "LET";
+pub const IF: &str = "IF";
+pub const ELSE: &str = "ELSE";
+pub const RETURN: &str = "RETURN";
+pub const TRUE: &str = "TRUE";
+pub const FALSE: &str = "FALSE";
 
-//pub static KEYWORDS: phf::Map<&str, &str> = phf::Map::from([("fn", FUNCTION), ("let", LET)]);
 pub static KEYWORDS: phf::Map<&str, &str> = phf_map! {
     "fn" => FUNCTION,
     "let" => LET,
+    "true" => TRUE,
+    "false" => FALSE,
+    "return" => RETURN,
+    "if" => IF,
+    "else" => ELSE
 };
 
 pub fn lookup_ident(ident: &str) -> TokenType {

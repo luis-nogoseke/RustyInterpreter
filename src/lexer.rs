@@ -8,9 +8,15 @@ fn is_digit(ch: char) -> bool {
     '0' <= ch && ch <= '9'
 }
 
-fn new_token(token_type: token::TokenType, ch: char) -> token::Token {
+fn new_token(token_type: &str, ch: char) -> token::Token {
+    if ch == '\0' {
+        return token::Token {
+            Type: String::from(token_type),
+            Literal: String::from(""),
+        };
+    }
     token::Token {
-        Type: token_type,
+        Type: String::from(token_type),
         Literal: ch.to_string(),
     }
 }
@@ -44,6 +50,14 @@ impl Lexer {
         self.read_position += 1;
     }
 
+    fn peek_char(&mut self) -> char {
+        if self.read_position >= self.input.len() {
+            '\0'
+        } else {
+            self.input.as_bytes()[self.read_position] as char
+        }
+    }
+
     fn read_identifier(&mut self) -> String {
         let p = self.position;
         while is_letter(self.ch) {
@@ -74,95 +88,47 @@ impl Lexer {
         println!("Read char {}", self.ch);
         match self.ch {
             '=' => {
-                tok = token::Token {
-                    Type: String::from(token::ASSIGN),
-                    Literal: self.ch.to_string(),
-                };
+                if self.peek_char() == '=' {
+                    let ch = self.ch;
+                    self.read_char();
+                    let lit = format!("{}{}", ch, self.ch);
+                    tok = token::Token {
+                        Type: String::from(token::EQ),
+                        Literal: lit,
+                    };
+                } else {
+                    tok = new_token(token::ASSIGN, self.ch);
+                }
             }
-            ';' => {
-                tok = token::Token {
-                    Type: String::from(token::SEMICOLON),
-                    Literal: self.ch.to_string(),
-                };
-            }
-            '(' => {
-                tok = token::Token {
-                    Type: String::from(token::LPAREN),
-                    Literal: self.ch.to_string(),
-                };
-            }
-            ')' => {
-                tok = token::Token {
-                    Type: String::from(token::RPAREN),
-                    Literal: self.ch.to_string(),
-                };
-            }
-            ',' => {
-                tok = token::Token {
-                    Type: String::from(token::COMMA),
-                    Literal: self.ch.to_string(),
-                };
-            }
-            '+' => {
-                tok = token::Token {
-                    Type: String::from(token::PLUS),
-                    Literal: self.ch.to_string(),
-                };
-            }
-            '{' => {
-                tok = token::Token {
-                    Type: String::from(token::LBRACE),
-                    Literal: self.ch.to_string(),
-                };
-            }
-            '}' => {
-                tok = token::Token {
-                    Type: String::from(token::RBRACE),
-                    Literal: self.ch.to_string(),
-                };
-            }
-            '-' => {
-                tok = token::Token {
-                    Type: String::from(token::MINUS),
-                    Literal: self.ch.to_string(),
-                };
-            }
+            ';' => tok = new_token(token::SEMICOLON, self.ch),
+            '(' => tok = new_token(token::LPAREN, self.ch),
+            ')' => tok = new_token(token::RPAREN, self.ch),
+            ',' => tok = new_token(token::COMMA, self.ch),
+            '+' => tok = new_token(token::PLUS, self.ch),
+            '{' => tok = new_token(token::LBRACE, self.ch),
+            '}' => tok = new_token(token::RBRACE, self.ch),
+            '-' => tok = new_token(token::MINUS, self.ch),
             '!' => {
-                tok = token::Token {
-                    Type: String::from(token::BANG),
-                    Literal: self.ch.to_string(),
-                };
+                if self.peek_char() == '=' {
+                    let ch = self.ch;
+                    self.read_char();
+                    let lit = format!("{}{}", ch, self.ch);
+                    tok = token::Token {
+                        Type: String::from(token::NOT_EQ),
+                        Literal: lit,
+                    };
+                } else {
+                    tok = token::Token {
+                        Type: String::from(token::BANG),
+                        Literal: self.ch.to_string(),
+                    };
+                }
             }
-            '*' => {
-                tok = token::Token {
-                    Type: String::from(token::ASTERISK),
-                    Literal: self.ch.to_string(),
-                };
-            }
-            '/' => {
-                tok = token::Token {
-                    Type: String::from(token::SLASH),
-                    Literal: self.ch.to_string(),
-                };
-            }
-            '>' => {
-                tok = token::Token {
-                    Type: String::from(token::GT),
-                    Literal: self.ch.to_string(),
-                };
-            }
-            '<' => {
-                tok = token::Token {
-                    Type: String::from(token::LT),
-                    Literal: self.ch.to_string(),
-                };
-            }
-            '\0' => {
-                tok = token::Token {
-                    Type: String::from(token::EOF),
-                    Literal: String::from(""),
-                };
-            }
+            '*' => tok = new_token(token::ASTERISK, self.ch),
+            '/' => tok = new_token(token::SLASH, self.ch),
+            '>' => tok = new_token(token::GT, self.ch),
+            '<' => tok = new_token(token::LT, self.ch),
+            '\0' => tok = new_token(token::EOF, self.ch),
             _ => {
                 if is_letter(self.ch) {
                     let lit = self.read_identifier();
@@ -212,6 +178,14 @@ let add = fn(x, y) {
 let result = add(five, ten);
 !-/*5
 5 < 10 > 5;
+
+if (5 < 10) {
+    return true;
+} else {
+    return false;
+}
+30 == 30;
+56 != 84;
 ",
         );
         let tests: Vec<(token::TokenType, String)> = Vec::from([
@@ -261,6 +235,31 @@ let result = add(five, ten);
             (String::from(token::INT), String::from("10")),
             (String::from(token::GT), String::from(">")),
             (String::from(token::INT), String::from("5")),
+            (String::from(token::SEMICOLON), String::from(";")),
+            (String::from(token::IF), String::from("if")),
+            (String::from(token::LPAREN), String::from("(")),
+            (String::from(token::INT), String::from("5")),
+            (String::from(token::LT), String::from("<")),
+            (String::from(token::INT), String::from("10")),
+            (String::from(token::RPAREN), String::from(")")),
+            (String::from(token::LBRACE), String::from("{")),
+            (String::from(token::RETURN), String::from("return")),
+            (String::from(token::TRUE), String::from("true")),
+            (String::from(token::SEMICOLON), String::from(";")),
+            (String::from(token::RBRACE), String::from("}")),
+            (String::from(token::ELSE), String::from("else")),
+            (String::from(token::LBRACE), String::from("{")),
+            (String::from(token::RETURN), String::from("return")),
+            (String::from(token::FALSE), String::from("false")),
+            (String::from(token::SEMICOLON), String::from(";")),
+            (String::from(token::RBRACE), String::from("}")),
+            (String::from(token::INT), String::from("30")),
+            (String::from(token::EQ), String::from("==")),
+            (String::from(token::INT), String::from("30")),
+            (String::from(token::SEMICOLON), String::from(";")),
+            (String::from(token::INT), String::from("56")),
+            (String::from(token::NOT_EQ), String::from("!=")),
+            (String::from(token::INT), String::from("84")),
             (String::from(token::SEMICOLON), String::from(";")),
             (String::from(token::EOF), String::from("")),
         ]);
