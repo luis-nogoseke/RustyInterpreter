@@ -1,3 +1,5 @@
+use std::fmt;
+
 use phf::phf_map;
 
 pub type TokenType = String;
@@ -58,5 +60,15 @@ pub fn lookup_ident(ident: &str) -> TokenType {
     match KEYWORDS.get(ident) {
         Some(tok) => String::from(*tok),
         None => String::from(IDENT),
+    }
+}
+
+impl fmt::Display for Token {
+    // This trait requires `fmt` with this exact signature.
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        // stream: `f`. Returns `fmt::Result` which indicates whether the
+        // operation succeeded or failed. Note that `write!` uses syntax which
+        // is very similar to `println!`.
+        write!(f, "Type: {} Literal: {}", self.Type, self.Literal)
     }
 }

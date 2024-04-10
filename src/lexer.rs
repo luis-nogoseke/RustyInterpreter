@@ -21,7 +21,7 @@ fn new_token(token_type: &str, ch: char) -> token::Token {
     }
 }
 
-struct Lexer {
+pub struct Lexer {
     input: String,
     position: usize,
     read_position: usize,
@@ -29,7 +29,7 @@ struct Lexer {
 }
 
 impl Lexer {
-    fn new(code: String) -> Lexer {
+    pub fn new(code: String) -> Lexer {
         let mut l = Lexer {
             input: code,
             position: 0,
@@ -40,7 +40,7 @@ impl Lexer {
         l
     }
 
-    fn read_char(&mut self) {
+    pub fn read_char(&mut self) {
         if self.read_position >= self.input.len() {
             self.ch = '\0';
         } else {
@@ -80,12 +80,11 @@ impl Lexer {
         }
     }
 
-    fn next_token(&mut self) -> token::Token {
+    pub fn next_token(&mut self) -> token::Token {
         let tok: token::Token;
 
         self.skip_whitespace();
 
-        println!("Read char {}", self.ch);
         match self.ch {
             '=' => {
                 if self.peek_char() == '=' {
@@ -132,7 +131,6 @@ impl Lexer {
             _ => {
                 if is_letter(self.ch) {
                     let lit = self.read_identifier();
-                    println!("Read identifier {}", lit);
                     let toktype = token::lookup_ident(&lit);
                     tok = token::Token {
                         Type: String::from(toktype),
@@ -141,7 +139,6 @@ impl Lexer {
                     return tok;
                 } else if is_digit(self.ch) {
                     let lit = self.read_number();
-                    println!("Read number {}", lit);
                     tok = token::Token {
                         Type: String::from(token::INT),
                         Literal: lit,
