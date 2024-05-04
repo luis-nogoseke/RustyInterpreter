@@ -2,15 +2,11 @@ use crate::token;
 
 trait NodeInt {}
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Copy, Clone, Default)]
 pub enum StatementType {
+    #[default]
+    Default,
     LetStatement,
-}
-
-pub trait Statement {
-    fn statement_node(&self);
-    fn token_literal(&self) -> String;
-    fn st_type(&self) -> StatementType;
 }
 
 trait Expression {
@@ -40,27 +36,30 @@ impl Expression for Identifier {
 }
 
 #[derive(Default, Clone)]
-pub struct LetStatement {
+pub struct Statement {
     pub token: token::Token,
     pub name: Identifier,
+    pub st_type: StatementType,
     //value: Expression,
 }
 
-impl Statement for LetStatement {
-    fn token_literal(&self) -> String {
+impl Statement {
+    pub fn token_literal(&self) -> String {
         self.token.Literal.clone()
     }
 
-    fn statement_node(&self) {}
+    pub fn statement_node(&self) {}
 
-    fn st_type(&self) -> StatementType {
-        StatementType::LetStatement
+    pub fn new_let_statement() -> Statement {
+        let mut s = Statement::default();
+        s.st_type = StatementType::LetStatement;
+        s
     }
 }
 
 #[derive(Default)]
 pub struct Program {
-    pub statements: Vec<Box<dyn Statement>>,
+    pub statements: Vec<Statement>,
 }
 
 impl Program {

@@ -30,23 +30,26 @@ let foobar = 838383;
     let tests = Vec::from(["x", "y", "foobar"]);
 
     for (i, x) in tests.iter().enumerate() {
-        let stmt: &dyn Statement = &*program.statements[i];
-        if !test_let_statement(&*stmt, x) {
-            return;
-        }
+        let stmt: &Statement = &program.statements[i];
+        test_let_statement(&*stmt, x);
     }
 }
 
-fn test_let_statement(st: &dyn Statement, name: &str) -> bool {
+fn test_let_statement(st: &Statement, name: &str) {
     if st.token_literal() != "let" {
         println!("Expected let, got {}", st.token_literal());
-        return false;
     }
 
-    if st.st_type() != StatementType::LetStatement {
-        println!("Expected LetStatment, got {:?}", st.st_type());
-        return false;
-    }
+    assert_eq!("let", st.token_literal());
 
-    return true;
+    if st.st_type != StatementType::LetStatement {
+        println!("Expected LetStatment, got {:?}", st.st_type);
+    }
+    assert_eq!(StatementType::LetStatement, st.st_type);
+
+    if st.name.value != name {
+        println!("Expected {} got {}", st.name.value, name);
+    }
+    assert_eq!(name, st.name.value);
+    assert_eq!(name, st.name.token.Literal);
 }

@@ -44,9 +44,9 @@ impl Parser {
         }
     }
 
-    fn parse_let_statement(&mut self) -> Option<ast::LetStatement> {
+    fn parse_let_statement(&mut self) -> Option<ast::Statement> {
         println!("Parsing a let statement");
-        let mut st = ast::LetStatement::default();
+        let mut st = ast::Statement::new_let_statement();
         st.token = self.cur_token.clone();
         println!("{:?}", st.token);
         if !self.expect_peek(String::from(token::IDENT)) {
@@ -70,10 +70,10 @@ impl Parser {
         Some(st)
     }
 
-    fn parse_statement(&mut self) -> Option<Box<dyn ast::Statement>> {
+    fn parse_statement(&mut self) -> Option<ast::Statement> {
         match self.cur_token.Type.as_str() {
             token::LET => match self.parse_let_statement() {
-                Some(l) => Some(Box::new(l)),
+                Some(l) => Some(l),
                 None => None,
             },
             _ => None,
