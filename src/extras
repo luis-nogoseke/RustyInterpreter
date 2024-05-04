@@ -1,0 +1,3 @@
+- Support floats in the lexer
+- Implement different types of parsers
+

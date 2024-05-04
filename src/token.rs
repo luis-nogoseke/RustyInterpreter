@@ -4,9 +4,19 @@ use phf::phf_map;
 
 pub type TokenType = String;
 
+#[derive(Clone, Default, Debug)]
 pub struct Token {
     pub Type: TokenType,
     pub Literal: String,
+}
+
+impl Token {
+    pub fn new() -> Self {
+        Self {
+            Type: String::from(EOF),
+            Literal: String::from(""),
+        }
+    }
 }
 
 pub const ILLEGAL: &str = "ILLEGAL";

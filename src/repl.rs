@@ -4,7 +4,7 @@ use crate::lexer;
 use crate::token;
 
 pub fn start() {
-    let mut buffer = String::new();
+    let mut buffer: String;
     loop {
         buffer = String::new();
         print!(">>>");
